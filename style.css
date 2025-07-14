@@ -45,7 +45,7 @@ h1, h2, h3 {
 h2 {
     font-size: 3rem;
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 25px; /* Adjusted margin */
     position: relative;
 }
 
@@ -62,6 +62,15 @@ h2::after {
 
 p {
     margin-bottom: 1.2rem;
+}
+
+/* New rule for better desktop paragraph spacing */
+.section-intro {
+    text-align: center;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 40px;
 }
 
 a {
@@ -170,7 +179,7 @@ nav ul li a.active::after {
 .hero-content {
     position: relative;
     z-index: 2;
-    padding: 0 20px; /* Add padding for mobile */
+    padding: 0 20px;
 }
 .hero h1 {
     font-size: 5rem;
@@ -317,11 +326,11 @@ nav ul li a.active::after {
 .form-container {
     position: relative;
     width: 100%;
-    max-width: 750px; /* Wider for the form */
-    height: 600px; /* Default height */
+    max-width: 850px; /* Increased max-width for desktop */
+    height: 750px; /* Increased height for desktop */
     margin: 40px auto 0;
     border-radius: 10px;
-    overflow: hidden; /* Hides any part of iframe sticking out */
+    overflow: hidden;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 .form-container iframe {
@@ -369,10 +378,6 @@ footer p {
 
 /* For Mobile Phones */
 @media (max-width: 768px) {
-    body {
-        text-align: center;
-    }
-
     /* --- MOBILE NAVIGATION --- */
     nav {
         flex-direction: column;
@@ -388,7 +393,7 @@ footer p {
     }
      nav ul li a {
         padding: 8px 12px;
-        font-size: 0.95rem; /* Reduced font size */
+        font-size: 0.95rem;
     }
 
     /* --- MOBILE TYPOGRAPHY & SPACING --- */
@@ -403,6 +408,9 @@ footer p {
     }
     .hero p {
         font-size: 1.1rem;
+    }
+    .section-intro {
+        margin-bottom: 30px;
     }
 
     /* --- MOBILE LAYOUTS --- */
@@ -425,6 +433,6 @@ footer p {
         height: 150px;
     }
     .form-container {
-        height: 850px; /* Taller height for mobile to prevent inner scrollbar */
+        height: 800px; /* Adjusted height for mobile to avoid scrollbars */
     }
 }
