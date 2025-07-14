@@ -313,38 +313,21 @@ nav ul li a.active::after {
     font-size: 0.9rem;
 }
 
-/* --- Contact Page --- */
-.contact-form {
-    max-width: 700px;
+/* --- Contact Page (Google Form Embed) --- */
+.form-container {
+    position: relative;
+    width: 100%;
+    max-width: 750px; /* Wider for the form */
+    height: 600px; /* Default height */
     margin: 40px auto 0;
-    display: grid;
-    gap: 20px;
+    border-radius: 10px;
+    overflow: hidden; /* Hides any part of iframe sticking out */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
-.form-group {
+.form-container iframe {
     width: 100%;
-}
-.contact-form input,
-.contact-form textarea {
-    width: 100%;
-    padding: 15px;
-    font-family: var(--body-font);
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-    transition: border-color 0.3s, box-shadow 0.3s;
-}
-.contact-form input:focus,
-.contact-form textarea:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 5px rgba(0,0,0,0.1);
-}
-.contact-form button {
-    width: auto;
-    justify-self: center;
-    padding: 15px 50px;
-    font-size: 1.1rem;
+    height: 100%;
+    border: none;
 }
 
 /* --- Footer --- */
@@ -440,5 +423,8 @@ footer p {
     .team-member img {
         width: 150px;
         height: 150px;
+    }
+    .form-container {
+        height: 850px; /* Taller height for mobile to prevent inner scrollbar */
     }
 }
