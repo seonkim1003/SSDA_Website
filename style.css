@@ -6,7 +6,7 @@
     --secondary-color: #FFFFFF;
     --accent-color: #f0f0f0;
     --text-color: #333;
-    --heading-font: 'Playfair Display', serif;
+    --heading-font: 'Playfair+Display', serif;
     --body-font: 'Roboto', sans-serif;
 }
 
@@ -45,7 +45,7 @@ h1, h2, h3 {
 h2 {
     font-size: 3rem;
     text-align: center;
-    margin-bottom: 25px; /* Adjusted margin */
+    margin-bottom: 25px;
     position: relative;
 }
 
@@ -64,7 +64,6 @@ p {
     margin-bottom: 1.2rem;
 }
 
-/* New rule for better desktop paragraph spacing */
 .section-intro {
     text-align: center;
     max-width: 700px;
@@ -191,6 +190,8 @@ nav ul li a.active::after {
     font-size: 1.3rem;
     max-width: 600px;
     margin-bottom: 2rem;
+    margin-left: auto; /* --- FIX: Centers the block --- */
+    margin-right: auto; /* --- FIX: Centers the block --- */
 }
 
 /* --- Buttons --- */
@@ -326,8 +327,8 @@ nav ul li a.active::after {
 .form-container {
     position: relative;
     width: 100%;
-    max-width: 850px; /* Increased max-width for desktop */
-    height: 750px; /* Increased height for desktop */
+    max-width: 850px;
+    height: 750px;
     margin: 40px auto 0;
     border-radius: 10px;
     overflow: hidden;
@@ -433,6 +434,6 @@ footer p {
         height: 150px;
     }
     .form-container {
-        height: 800px; /* Adjusted height for mobile to avoid scrollbars */
+        height: 800px;
     }
 }
