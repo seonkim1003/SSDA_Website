@@ -21,6 +21,13 @@ body {
     background-color: var(--secondary-color);
     color: var(--text-color);
     line-height: 1.7;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex-grow: 1;
 }
 
 .container {
@@ -149,7 +156,7 @@ nav ul li a.active::after {
     text-align: center;
     color: var(--secondary-color);
     position: relative;
-    background: url('assets/IMG_8787.jpeg') no-repeat center center/cover;
+    background: url('IMG_8787.jpeg') no-repeat center center/cover;
 }
 .hero-overlay {
     position: absolute;
@@ -287,19 +294,15 @@ nav ul li a.active::after {
 
 /* --- Donate Page --- */
 .donate-container {
-    display: flex;
-    align-items: center;
-    gap: 50px;
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
 }
-.donate-image { flex: 1; }
-.donate-image img { width: 100%; border-radius: 10px; }
-.donate-content { flex: 1; }
 .incentive-box {
     background: var(--accent-color);
     padding: 20px;
     border-radius: 5px;
-    margin:20px 0;
-    text-align: center;
+    margin: 20px 0;
 }
 .incentive-box small {
     display: block;
@@ -341,14 +344,13 @@ nav ul li a.active::after {
     font-size: 1.1rem;
 }
 
-
 /* --- Footer --- */
 footer {
     background: var(--primary-color);
     color: var(--secondary-color);
     text-align: center;
     padding: 25px 0;
-    margin-top: auto; /* Pushes footer to bottom */
+    margin-top: auto;
 }
 footer p {
     margin: 0;
@@ -373,22 +375,19 @@ footer p {
         flex-direction: column;
         text-align: center;
     }
-    .donate-container {
-        flex-direction: column;
-        text-align: center;
-    }
-    .donate-image {
-        max-width: 400px;
-        margin-bottom: 30px;
-    }
 }
 
 @media (max-width: 768px) {
+    body {
+        text-align: center;
+    }
     nav {
         flex-direction: column;
     }
     nav ul {
         margin-top: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
     .hero h1 {
         font-size: 3.5rem;
@@ -406,5 +405,12 @@ footer p {
     .btn-secondary {
         margin-left: 0;
         margin-top: 15px;
+    }
+    .team-member {
+        padding: 20px;
+    }
+    .team-member img {
+        width: 150px;
+        height: 150px;
     }
 }
