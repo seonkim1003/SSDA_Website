@@ -165,7 +165,7 @@ nav ul li a.active::after {
     text-align: center;
     color: var(--secondary-color);
     position: relative;
-    background-image: url('IMG_8787.jpeg');
+    background-image: url('assets/team/everyone.jpeg');
     background-repeat: no-repeat;
     
     /* --- THE FIX --- */
