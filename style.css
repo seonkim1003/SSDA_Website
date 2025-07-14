@@ -6,7 +6,7 @@
     --secondary-color: #FFFFFF;
     --accent-color: #f0f0f0;
     --text-color: #333;
-    --heading-font: 'Playfair Display', serif;
+    --heading-font: 'Playfair+Display', serif;
     --body-font: 'Roboto', sans-serif;
 }
 
@@ -165,13 +165,7 @@ nav ul li a.active::after {
     text-align: center;
     color: var(--secondary-color);
     position: relative;
-    background-image: url('IMG_8787.jpeg');
-    background-repeat: no-repeat;
-    background-position: center center;
-
-    /* --- THE FIX --- */
-    background-size: contain; /* This ensures the whole image is always visible */
-    background-color: #000000; /* This fills the empty space with black */
+    background: url('IMG_8787.jpeg') no-repeat center center/cover;
 }
 .hero-overlay {
     position: absolute;
@@ -179,7 +173,7 @@ nav ul li a.active::after {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); /* This darkens the image and the black background */
+    background-color: rgba(0, 0, 0, 0.6);
 }
 .hero-content {
     position: relative;
@@ -196,8 +190,8 @@ nav ul li a.active::after {
     font-size: 1.3rem;
     max-width: 600px;
     margin-bottom: 2rem;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: auto; /* --- FIX: Centers the block --- */
+    margin-right: auto; /* --- FIX: Centers the block --- */
 }
 
 /* --- Buttons --- */
