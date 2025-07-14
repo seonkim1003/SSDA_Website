@@ -6,7 +6,7 @@
     --secondary-color: #FFFFFF;
     --accent-color: #f0f0f0;
     --text-color: #333;
-    --heading-font: 'Playfair+Display', serif;
+    --heading-font: 'Playfair Display', serif;
     --body-font: 'Roboto', sans-serif;
 }
 
@@ -165,7 +165,12 @@ nav ul li a.active::after {
     text-align: center;
     color: var(--secondary-color);
     position: relative;
-    background: url('IMG_8787.jpeg') no-repeat center center/cover;
+    background-image: url('IMG_8787.jpeg');
+    background-repeat: no-repeat;
+    
+    /* --- THE FIX --- */
+    background-size: cover; /* Reverted to cover to fill the space without bars */
+    background-position: center 25%; /* This prioritizes the top quarter of the image */
 }
 .hero-overlay {
     position: absolute;
@@ -190,8 +195,8 @@ nav ul li a.active::after {
     font-size: 1.3rem;
     max-width: 600px;
     margin-bottom: 2rem;
-    margin-left: auto; /* --- FIX: Centers the block --- */
-    margin-right: auto; /* --- FIX: Centers the block --- */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* --- Buttons --- */
@@ -412,6 +417,9 @@ footer p {
     }
     .section-intro {
         margin-bottom: 30px;
+    }
+    .hero {
+        background-position: center 30%; /* Slightly adjust focus for mobile */
     }
 
     /* --- MOBILE LAYOUTS --- */
