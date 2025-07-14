@@ -130,6 +130,7 @@ nav ul li a {
     font-weight: 500;
     position: relative;
     transition: color 0.3s;
+    white-space: nowrap; /* <<< THIS IS THE FIX <<< */
 }
 nav ul li a::after {
     content: '';
@@ -383,11 +384,16 @@ footer p {
     }
     nav {
         flex-direction: column;
+        padding-top: 15px;
+        padding-bottom: 15px;
     }
     nav ul {
         margin-top: 15px;
         flex-wrap: wrap;
         justify-content: center;
+    }
+     nav ul li a {
+        padding: 10px 15px; /* Adjust padding for smaller screens */
     }
     .hero h1 {
         font-size: 3.5rem;
