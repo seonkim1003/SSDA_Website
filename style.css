@@ -130,7 +130,7 @@ nav ul li a {
     font-weight: 500;
     position: relative;
     transition: color 0.3s;
-    white-space: nowrap; /* <<< THIS IS THE FIX <<< */
+    white-space: nowrap;
 }
 nav ul li a::after {
     content: '';
@@ -170,6 +170,7 @@ nav ul li a.active::after {
 .hero-content {
     position: relative;
     z-index: 2;
+    padding: 0 20px; /* Add padding for mobile */
 }
 .hero h1 {
     font-size: 5rem;
@@ -220,7 +221,7 @@ nav ul li a.active::after {
 
 /* --- Page Sections --- */
 .page-section {
-    padding: 100px 0;
+    padding: 80px 0;
 }
 .alt-bg {
     background-color: var(--accent-color);
@@ -290,6 +291,7 @@ nav ul li a.active::after {
     height: 200px;
     object-fit: cover;
     border-radius: 10px;
+    flex-shrink: 0;
 }
 .member-info h3 { margin-bottom: 10px; font-size: 1.8rem;}
 
@@ -329,7 +331,7 @@ nav ul li a.active::after {
     font-size: 1rem;
     border: 1px solid #ccc;
     border-radius: 5px;
-    box-sizing: border-box; /* Important for padding */
+    box-sizing: border-box;
     transition: border-color 0.3s, box-shadow 0.3s;
 }
 .contact-form input:focus,
@@ -340,7 +342,7 @@ nav ul li a.active::after {
 }
 .contact-form button {
     width: auto;
-    justify-self: center; /* Center button in grid */
+    justify-self: center;
     padding: 15px 50px;
     font-size: 1.1rem;
 }
@@ -370,7 +372,11 @@ footer p {
 }
 
 
-/* --- Responsive Design --- */
+/* --- ================================== --- */
+/* ---        RESPONSIVE DESIGN           --- */
+/* --- ================================== --- */
+
+/* For Tablets and smaller */
 @media (max-width: 992px) {
     .team-member {
         flex-direction: column;
@@ -378,35 +384,51 @@ footer p {
     }
 }
 
+/* For Mobile Phones */
 @media (max-width: 768px) {
     body {
         text-align: center;
     }
+
+    /* --- MOBILE NAVIGATION --- */
     nav {
         flex-direction: column;
         padding-top: 15px;
         padding-bottom: 15px;
     }
+    .nav-logo {
+        margin-bottom: 10px;
+    }
     nav ul {
-        margin-top: 15px;
         flex-wrap: wrap;
         justify-content: center;
     }
      nav ul li a {
-        padding: 10px 15px; /* Adjust padding for smaller screens */
+        padding: 8px 12px;
+        font-size: 0.95rem; /* Reduced font size */
+    }
+
+    /* --- MOBILE TYPOGRAPHY & SPACING --- */
+    .page-section {
+        padding: 60px 0;
+    }
+    h2 {
+        font-size: 2.2rem;
     }
     .hero h1 {
-        font-size: 3.5rem;
+        font-size: 3rem;
     }
     .hero p {
         font-size: 1.1rem;
     }
-    h2 {
-        font-size: 2.5rem;
-    }
+
+    /* --- MOBILE LAYOUTS --- */
     .social-links {
         flex-direction: column;
         align-items: center;
+    }
+    .social-card {
+        width: 90%;
     }
     .btn-secondary {
         margin-left: 0;
