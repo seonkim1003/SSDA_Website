@@ -264,7 +264,18 @@ nav ul li a.active::after {
     transform: translateY(-10px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
-.social-card h3 { font-size: 1.8rem; margin-bottom: 10px; }
+.social-card h3 { 
+    font-size: 1.8rem; 
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.social-card h3 svg {
+    fill: currentColor;
+}
+
 
 /* --- About Page --- */
 .video-container {
