@@ -167,10 +167,8 @@ nav ul li a.active::after {
     position: relative;
     background-image: url('assets/team/everyone.jpeg');
     background-repeat: no-repeat;
-    
-    /* --- THE FIX --- */
-    background-size: cover; /* Reverted to cover to fill the space without bars */
-    background-position: center 25%; /* This prioritizes the top quarter of the image */
+    background-size: cover; 
+    background-position: center 25%;
 }
 .hero-overlay {
     position: absolute;
@@ -264,18 +262,15 @@ nav ul li a.active::after {
     transform: translateY(-10px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
+/* --- THE NEW STYLE for social card logos --- */
+.social-card img {
+    height: 45px;
+    margin-bottom: 15px;
+}
 .social-card h3 { 
     font-size: 1.8rem; 
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    margin-bottom: 10px; 
 }
-.social-card h3 svg {
-    fill: currentColor;
-}
-
 
 /* --- About Page --- */
 .video-container {
