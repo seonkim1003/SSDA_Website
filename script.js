@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     // --- Banner Functionality ---
-    const banner = document.getElementById('survey-banner');
+    const banner = document.getElementById('promo-banner');
     const closeBannerBtn = document.getElementById('close-banner');
 
     if (banner && closeBannerBtn) {
