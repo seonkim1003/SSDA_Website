@@ -13,21 +13,26 @@
     <nav>
         <a href="index.html" class="nav-logo">
             <img src="assets/logo.png" alt="SSDA Logo">
-            <span data-translate="Student Self Defense Advocates">Student Self Defense Advocates</span>
+            <span data-translate-brand>Student Self Defense Advocates</span>
         </a>
-        <ul>
+        <ul class="nav-links">
             <li><a href="index.html" data-translate="Home">Home</a></li>
             <li><a href="about.html" data-translate="About Us">About Us</a></li>
             <li><a href="donate.html" data-translate="Donate">Donate</a></li>
             <li><a href="contact.html" data-translate="Contact">Contact</a></li>
             <li><a href="join.html" class="active" data-translate="Join Us">Join Us</a></li>
             <li class="language-switcher">
-                <select id="language-select">
-                    <option value="en">English</option>
-                    <option value="ko">Korean</option>
-                </select>
+                <div class="language-select-wrapper">
+                    <select id="language-select">
+                        <option value="en">English</option>
+                        <option value="ko">Korean</option>
+                    </select>
+                </div>
             </li>
         </ul>
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+        </button>
     </nav>
 
     <!-- Main Content -->

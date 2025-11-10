@@ -10,6 +10,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // --- Mobile Navigation Toggle ---
+    const navToggle = document.querySelector('.nav-toggle');
+    const navLinks = document.querySelector('.nav-links');
+
+    if (navToggle && navLinks) {
+        // Add transition class after a short delay to prevent animation on page load
+        setTimeout(() => {
+            navLinks.classList.add('transition-ready');
+        }, 100);
+
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('nav-open');
+            navToggle.classList.toggle('is-active');
+            document.body.classList.toggle('body-no-scroll');
+        });
+
+        // Close menu when a link is clicked
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                // Do not close for language switcher if it's inside
+                if (e.target.closest('.language-switcher')) {
+                    return;
+                }
+                if (navLinks.classList.contains('nav-open')) {
+                    navLinks.classList.remove('nav-open');
+                    navToggle.classList.remove('is-active');
+                    document.body.classList.remove('body-no-scroll');
+                }
+            });
+        });
+    }
 
     // --- Fade-in on Scroll Animation ---
     const faders = document.querySelectorAll('.fade-in');
@@ -38,10 +69,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const languageSelect = document.getElementById('language-select');
     const translatableElements = document.querySelectorAll('[data-translate]');
 
+    // Store original texts
+    translatableElements.forEach(element => {
+        element.dataset.originalText = element.innerHTML;
+    });
+
+
     const updateTranslations = (language) => {
+        // Handle all general translatable elements
         translatableElements.forEach(element => {
             const key = element.dataset.translate;
-            if (translations[language] && translations[language][key]) {
+            if (language === 'en') {
+                element.innerHTML = element.dataset.originalText;
+            } else if (translations[language] && translations[language][key]) {
+                // Store original text if it's not already stored
+                if (!element.dataset.originalText) {
+                    element.dataset.originalText = element.innerHTML;
+                }
                 element.innerHTML = translations[language][key];
             }
         });
