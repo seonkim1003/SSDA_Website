@@ -34,4 +34,38 @@ document.addEventListener('DOMContentLoaded', function() {
         appearOnScroll.observe(fader);
     });
 
+    // --- Language Switcher Functionality ---
+    const languageSelect = document.getElementById('language-select');
+    const translatableElements = document.querySelectorAll('[data-translate]');
+
+    const updateTranslations = (language) => {
+        translatableElements.forEach(element => {
+            const key = element.dataset.translate;
+            if (translations[language] && translations[language][key]) {
+                element.innerHTML = translations[language][key];
+            }
+        });
+    };
+
+    const setLanguage = (language) => {
+        document.documentElement.lang = language;
+        localStorage.setItem('language', language);
+        updateTranslations(language);
+    };
+
+    const getInitialLanguage = () => {
+        const savedLanguage = localStorage.getItem('language');
+        const browserLanguage = navigator.language.split('-')[0];
+        return savedLanguage || (translations[browserLanguage] ? browserLanguage : 'en');
+    };
+
+    if (languageSelect) {
+        const initialLanguage = getInitialLanguage();
+        languageSelect.value = initialLanguage;
+        setLanguage(initialLanguage);
+
+        languageSelect.addEventListener('change', (e) => {
+            setLanguage(e.target.value);
+        });
+    }
 });

@@ -6,20 +6,27 @@
     <title>Contact Us - SSDA</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="assets/logo.png" type="image/png">
+    <script src="translations.js"></script>
 </head>
 <body>
     <!-- Navigation Bar -->
     <nav>
         <a href="index.html" class="nav-logo">
             <img src="assets/logo.png" alt="SSDA Logo">
-            <span>Student Self Defense Advocates</span>
+            <span data-translate="Student Self Defense Advocates">Student Self Defense Advocates</span>
         </a>
         <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About Us</a></li>
-            <li><a href="donate.html">Donate</a></li>
-            <li><a href="contact.html" class="active">Contact</a></li>
-            <li><a href="join.html">Join Us</a></li>
+            <li><a href="index.html" data-translate="Home">Home</a></li>
+            <li><a href="about.html" data-translate="About Us">About Us</a></li>
+            <li><a href="donate.html" data-translate="Donate">Donate</a></li>
+            <li><a href="contact.html" class="active" data-translate="Contact">Contact</a></li>
+            <li><a href="join.html" data-translate="Join Us">Join Us</a></li>
+            <li class="language-switcher">
+                <select id="language-select">
+                    <option value="en">English</option>
+                    <option value="ko">Korean</option>
+                </select>
+            </li>
         </ul>
     </nav>
 
@@ -27,8 +34,8 @@
     <main>
         <section class="page-section fade-in">
             <div class="container">
-                <h2>Get In Touch</h2>
-                <p class="section-intro">Have questions, ideas for collaboration, or want to get involved? We'd love to hear from you. Please fill out the form below and we'll get back to you as soon as possible!</p>
+                <h2 data-translate="Get In Touch">Get In Touch</h2>
+                <p class="section-intro" data-translate="Have questions, ideas for collaboration, or want to get involved? We'd love to hear from you. Please fill out the form below and we'll get back to you as soon as possible!">Have questions, ideas for collaboration, or want to get involved? We'd love to hear from you. Please fill out the form below and we'll get back to you as soon as possible!</p>
 
                 <!-- Google Form Embed Container -->
                 <div class="form-container">
@@ -41,7 +48,7 @@
 
     <!-- Footer -->
     <footer>
-        <p>© 2025 Student Self Defense Advocates - A Student-led Project of Next Generation Advocates</p>
+        <p data-translate="© 2025 Student Self Defense Advocates - A Student-led Project of Next Generation Advocates">© 2025 Student Self Defense Advocates - A Student-led Project of Next Generation Advocates</p>
     </footer>
     <script src="script.js"></script>
 </body>

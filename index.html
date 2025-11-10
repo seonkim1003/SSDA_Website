@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Self Defense Advocates - Home</title>
     <link rel="stylesheet" href="style.css">
+    <script src="translations.js"></script>
 </head>
 <body>
 
     <!-- Survey Banner -->
     <div class="banner" id="promo-banner">
-        <p>Help us improve! Take our quick survey on self-defense awareness.
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLSc5TL154Yr0GuZ_Mmkfs00wIVl9BeKmn9KAuRJKNWarvvPPsg/viewform?usp=send_form" target="_blank">Take Survey</a>
+        <p data-translate="Help us improve! Take our quick survey on self-defense awareness.">Help us improve! Take our quick survey on self-defense awareness.
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSc5TL154Yr0GuZ_Mmkfs00wIVl9BeKmn9KAuRJKNWarvvPPsg/viewform?usp=send_form" target="_blank" data-translate="Take Survey">Take Survey</a>
         </p>
         <button class="close-btn" id="close-banner">×</button>
     </div>
@@ -20,14 +21,20 @@
     <nav>
         <a href="index.html" class="nav-logo">
             <img src="assets/logo.png" alt="SSDA Logo">
-            <span>Student Self Defense Advocates</span>
+            <span data-translate="Student Self Defense Advocates">Student Self Defense Advocates</span>
         </a>
         <ul>
-            <li><a href="index.html" class="active">Home</a></li>
-            <li><a href="about.html">About Us</a></li>
-            <li><a href="donate.html">Donate</a></li>
-            <li><a href="contact.html">Contact</a></li>
-            <li><a href="join.html">Join Us</a></li>
+            <li><a href="index.html" class="active" data-translate="Home">Home</a></li>
+            <li><a href="about.html" data-translate="About Us">About Us</a></li>
+            <li><a href="donate.html" data-translate="Donate">Donate</a></li>
+            <li><a href="contact.html" data-translate="Contact">Contact</a></li>
+            <li><a href="join.html" data-translate="Join Us">Join Us</a></li>
+            <li class="language-switcher">
+                <select id="language-select">
+                    <option value="en">English</option>
+                    <option value="ko">Korean</option>
+                </select>
+            </li>
         </ul>
     </nav>
 
@@ -35,11 +42,11 @@
     <header class="hero">
         <div class="hero-overlay"></div>
         <div class="hero-content fade-in">
-            <h1>Stand Up For What's Right.</h1>
-            <p>Empowering students with the confidence and skills to feel safe, prepared, and in control.</p>
+            <h1 data-translate="Stand Up For What's Right.">Stand Up For What's Right.</h1>
+            <p data-translate="Empowering students with the confidence and skills to feel safe, prepared, and in control.">Empowering students with the confidence and skills to feel safe, prepared, and in control.</p>
             <div class="hero-buttons">
-                <a href="donate.html" class="btn btn-primary">Donate Now</a>
-                <a href="about.html" class="btn btn-secondary">Learn More</a>
+                <a href="donate.html" class="btn btn-primary" data-translate="Donate Now">Donate Now</a>
+                <a href="about.html" class="btn btn-secondary" data-translate="Learn More">Learn More</a>
             </div>
         </div>
     </header>
@@ -47,25 +54,25 @@
     <!-- Socials/Links Section -->
     <section class="page-section fade-in">
         <div class="container">
-            <h2>Follow Our Journey</h2>
-            <p class="section-intro">Stay connected with our events, classes, and advocacy work on our social platforms.</p>
+            <h2 data-translate="Follow Our Journey">Follow Our Journey</h2>
+            <p class="section-intro" data-translate="Stay connected with our events, classes, and advocacy work on our social platforms.">Stay connected with our events, classes, and advocacy work on our social platforms.</p>
             <div class="social-links">
                 <div class="social-card-wrapper">
                     <div class="social-card social-card-disabled">
                         <img src="https://img.icons8.com/ios-glyphs/60/000000/instagram-new.png" alt="Instagram Logo"/>
-                        <h3>Instagram</h3>
-                        <small class="technical-message">Our Instagram is currently facing technical difficulties. Please check back later!</small>
+                        <h3 data-translate="Instagram">Instagram</h3>
+                        <small class="technical-message" data-translate="Our Instagram is currently facing technical difficulties. Please check back later!">Our Instagram is currently facing technical difficulties. Please check back later!</small>
                     </div>
                 </div>
                 <a href="https://youtube.com/@studentselfdefenseadvocates?si=a45JCacGeoSFJm_M" target="_blank" class="social-card">
                     <img src="https://img.icons8.com/ios-glyphs/60/000000/youtube-play.png" alt="YouTube Logo"/>
-                    <h3>YouTube</h3>
-                    <p>Watch tutorials, event recaps, and interviews with our team.</p>
+                    <h3 data-translate="YouTube">YouTube</h3>
+                    <p data-translate="Watch tutorials, event recaps, and interviews with our team.">Watch tutorials, event recaps, and interviews with our team.</p>
                 </a>
                 <a href="#" target="_blank" class="social-card">
                     <img src="https://img.icons8.com/ios-filled/60/000000/tiktok.png" alt="TikTok Logo"/>
-                    <h3>TikTok</h3>
-                    <p>Follow us for quick tips, highlights, and behind-the-scenes content.</p>
+                    <h3 data-translate="TikTok">TikTok</h3>
+                    <p data-translate="Follow us for quick tips, highlights, and behind-the-scenes content.">Follow us for quick tips, highlights, and behind-the-scenes content.</p>
                 </a>
             </div>
         </div>
@@ -73,7 +80,7 @@
 
     <!-- Footer -->
     <footer>
-        <p>© 2025 Student Self Defense Advocates - A Student-led Project of Next Generation Advocates</p>
+        <p data-translate="© 2025 Student Self Defense Advocates - A Student-led Project of Next Generation Advocates">© 2025 Student Self Defense Advocates - A Student-led Project of Next Generation Advocates</p>
     </footer>
 
     <script src="script.js"></script>
