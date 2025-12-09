@@ -300,6 +300,18 @@ async function handleUpload(request, r2Bucket, kvStore, corsHeaders) {
     const group = formData.get('group') || 'Ungrouped';
     const images = formData.getAll('images');
 
+    console.log('📋 FormData received:', {
+      group: group,
+      imagesCount: images.length,
+      imageTypes: images.map(img => ({
+        type: typeof img,
+        constructor: img?.constructor?.name,
+        isFile: img instanceof File,
+        isBlob: img instanceof Blob,
+        name: img?.name
+      }))
+    });
+
     if (images.length === 0) {
       return new Response(
         JSON.stringify({ error: 'No images provided' }),
@@ -311,14 +323,59 @@ async function handleUpload(request, r2Bucket, kvStore, corsHeaders) {
 
     for (let i = 0; i < images.length; i++) {
       const imageFile = images[i];
-      if (!imageFile || !(imageFile instanceof File)) continue;
+      
+      // Check if it's a valid file-like object (File or Blob)
+      // Cloudflare Workers might use Blob instead of File
+      if (!imageFile) {
+        console.warn(`⚠️ Image ${i} is null or undefined`);
+        continue;
+      }
+      
+      const isFile = imageFile instanceof File;
+      const isBlob = imageFile instanceof Blob;
+      
+      if (!isFile && !isBlob) {
+        console.error(`❌ Image ${i} is not a File or Blob:`, {
+          type: typeof imageFile,
+          constructor: imageFile.constructor?.name,
+          value: imageFile
+        });
+        continue;
+      }
+      
+      console.log(`✅ Processing image ${i}:`, {
+        name: imageFile.name,
+        type: imageFile.type,
+        size: imageFile.size,
+        isFile: isFile,
+        isBlob: isBlob
+      });
 
       // Generate unique ID
       const imageId = `${Date.now()}-${i}-${Math.random().toString(36).substring(2, 15)}`;
-      const fileExtension = imageFile.name.split('.').pop() || 'jpg';
+      // Get file extension from name if available, otherwise guess from content type
+      let fileExtension = 'jpg';
+      if (imageFile.name) {
+        fileExtension = imageFile.name.split('.').pop() || 'jpg';
+      } else if (imageFile.type) {
+        // Guess extension from MIME type
+        const extMap = {
+          'image/jpeg': 'jpg',
+          'image/png': 'png',
+          'image/gif': 'gif',
+          'image/webp': 'webp',
+          'image/svg+xml': 'svg'
+        };
+        fileExtension = extMap[imageFile.type] || 'jpg';
+      }
       const imageName = `image-${imageId}.${fileExtension}`;
       // Store in R2 with gallery-imagessda/ directory structure
-      const r2Key = `gallery-imagessda/${imageName}`;
+      // Make sure we don't double-prefix
+      const r2Key = imageName.startsWith('gallery-imagessda/') 
+        ? imageName 
+        : `gallery-imagessda/${imageName}`;
+      
+      console.log('📝 Generated R2 key for upload:', r2Key);
 
       // Convert File to ArrayBuffer (R2 requires ArrayBuffer/Blob/Stream)
       let fileBody;
@@ -343,7 +400,9 @@ async function handleUpload(request, r2Bucket, kvStore, corsHeaders) {
       // Determine Content-Type
       const contentType = imageFile.type || getContentTypeFromExtension(fileExtension);
 
-      console.log('📤 Uploading to R2:', r2Key, 'Content-Type:', contentType, 'Size:', fileBody.byteLength);
+      console.log('📤 Uploading to R2 with key:', r2Key);
+      console.log('   Content-Type:', contentType, 'Size:', fileBody.byteLength);
+      console.log('   Full R2 path will be:', r2Key);
 
       // Upload to R2
       await r2Bucket.put(r2Key, fileBody, {
@@ -379,7 +438,7 @@ async function handleUpload(request, r2Bucket, kvStore, corsHeaders) {
         url: imageUrl,
         group: group,
         uploadedAt: new Date().toISOString(),
-        size: imageFile.size,
+        size: imageFile.size || fileBody.byteLength,
         type: contentType,
       };
 
@@ -407,8 +466,22 @@ async function handleUpload(request, r2Bucket, kvStore, corsHeaders) {
 
     console.log('✅ Upload complete:', {
       imagesUploaded: uploadedImages.length,
-      totalImages: index.length
+      totalImages: index.length,
+      uploadedImageIds: uploadedImages.map(img => img.id)
     });
+    
+    if (uploadedImages.length === 0) {
+      console.error('⚠️ WARNING: No images were successfully uploaded!');
+      console.error('   This means all files were skipped. Check logs above for details.');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'No images were processed. All files were skipped.',
+          images: []
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     return new Response(
       JSON.stringify({ success: true, images: uploadedImages }),
@@ -636,8 +709,14 @@ async function handleGetImage(filename, r2Bucket, corsHeaders) {
     
     // The filename from URL should include gallery-imagessda/ prefix
     // Handle backward compatibility with old formats
+    console.log('🔍 handleGetImage - Received filename:', filename);
     let r2Key = filename;
-    if (!filename.startsWith('gallery-imagessda/')) {
+    
+    // If filename already starts with gallery-imagessda/, use it as-is
+    if (filename.startsWith('gallery-imagessda/')) {
+      r2Key = filename;
+      console.log('✅ Filename already has gallery-imagessda/ prefix, using as-is:', r2Key);
+    } else {
       // Try different formats for backward compatibility
       if (filename.startsWith('gallery-images/gallery-image/')) {
         // Old format: gallery-images/gallery-image/image-123.jpg -> gallery-imagessda/image-123.jpg
@@ -655,13 +734,19 @@ async function handleGetImage(filename, r2Bucket, corsHeaders) {
         r2Key = `gallery-imagessda/${imageName}`;
         console.log('🔍 Converting old format to gallery-imagessda:', r2Key);
       } else {
-        // No prefix, add the gallery-imagessda/ directory
-        r2Key = `gallery-imagessda/${filename}`;
-        console.log('🔍 Adding gallery-imagessda/ directory:', r2Key);
+        // No prefix, add the gallery-imagessda/ directory (just the filename)
+        // Make sure we're not adding it if filename already contains it
+        if (!filename.includes('gallery-imagessda')) {
+          r2Key = `gallery-imagessda/${filename}`;
+          console.log('🔍 Adding gallery-imagessda/ directory to filename:', r2Key);
+        } else {
+          r2Key = filename;
+          console.log('⚠️ Filename already contains gallery-imagessda, using as-is:', r2Key);
+        }
       }
-    } else {
-      console.log('🔍 Fetching image from R2:', r2Key);
     }
+    
+    console.log('📦 Final R2 key to fetch:', r2Key);
     
     // Get from R2
     let object = await r2Bucket.get(r2Key);
