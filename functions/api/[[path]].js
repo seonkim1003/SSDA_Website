@@ -305,7 +305,13 @@ async function handleUpload(request, r2Bucket, kvStore, corsHeaders) {
   } catch (error) {
     console.error('Upload error:', error);
     return new Response(
-      JSON.stringify({ error: 'Upload failed: ' + error.message }),
+      JSON.stringify({ 
+        error: 'Upload failed',
+        details: error.message || 'An unexpected error occurred during upload',
+        troubleshooting: error.message && error.message.includes('binding') 
+          ? 'Check R2 binding: gallery-imagessda and KV binding: GALLERY_SSDA'
+          : 'Please check your network connection and try again. If the problem persists, check the browser console for more details.'
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

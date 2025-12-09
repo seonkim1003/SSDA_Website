@@ -30,6 +30,9 @@ const progressFill = document.getElementById('progress-fill');
 const progressText = document.getElementById('progress-text');
 const uploadSuccess = document.getElementById('upload-success');
 const successMessage = document.getElementById('success-message');
+const uploadError = document.getElementById('upload-error');
+const errorTitle = document.getElementById('error-title');
+const errorDetails = document.getElementById('error-details');
 const galleryGrid = document.getElementById('gallery-grid');
 const loadingSpinner = document.getElementById('loading-spinner');
 const emptyGallery = document.getElementById('empty-gallery');
@@ -269,6 +272,10 @@ uploadBtn.addEventListener('click', async () => {
     });
     formData.append('group', groupTitle);
     
+    // Hide any previous errors
+    uploadError.style.display = 'none';
+    uploadSuccess.style.display = 'none';
+    
     try {
         const response = await fetch(`${API_BASE}/upload`, {
             method: 'POST',
@@ -276,7 +283,32 @@ uploadBtn.addEventListener('click', async () => {
         });
         
         if (!response.ok) {
-            throw new Error('Upload failed');
+            // Try to get detailed error from response
+            let errorMessage = 'Upload failed';
+            let errorDetailsText = '';
+            
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.error || errorMessage;
+                errorDetailsText = errorData.details || '';
+                
+                // Check for binding errors
+                if (errorMessage.includes('binding') || errorMessage.includes('R2') || errorMessage.includes('KV')) {
+                    errorDetailsText += '\n\nRequired bindings:\n- R2: gallery-imagessda\n- KV: GALLERY_SSDA';
+                }
+            } catch (e) {
+                errorDetailsText = `HTTP ${response.status}: ${response.statusText}`;
+            }
+            
+            // Show error message
+            errorTitle.textContent = errorMessage;
+            errorDetails.textContent = errorDetailsText || `Server returned error ${response.status}`;
+            uploadProgress.style.display = 'none';
+            uploadError.style.display = 'flex';
+            uploadBtn.disabled = false;
+            
+            console.error('Upload failed:', errorMessage, errorDetailsText);
+            return;
         }
         
         const result = await response.json();
@@ -285,6 +317,7 @@ uploadBtn.addEventListener('click', async () => {
         
         setTimeout(() => {
             uploadProgress.style.display = 'none';
+            uploadError.style.display = 'none';
             uploadSuccess.style.display = 'block';
             uploadSuccess.classList.add('success');
             selectedFiles = [];
@@ -300,8 +333,12 @@ uploadBtn.addEventListener('click', async () => {
         
     } catch (error) {
         console.error('Upload error:', error);
-        alert('Upload failed. Please try again.');
+        
+        // Show detailed error message
+        errorTitle.textContent = 'Network Error';
+        errorDetails.textContent = error.message || 'Failed to connect to server. Please check your internet connection and try again.';
         uploadProgress.style.display = 'none';
+        uploadError.style.display = 'flex';
         uploadBtn.disabled = false;
     }
 });
