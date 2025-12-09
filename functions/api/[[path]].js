@@ -111,17 +111,23 @@ export async function onRequest(context) {
       const groupName = decodeURIComponent(path.replace('/api/delete-group/', ''));
       return handleDeleteGroup(groupName, r2Bucket, kvStore, corsHeaders);
     } else if (path.startsWith('/api/image/')) {
-      let filename = path.split('/api/image/')[1];
+      // Extract the filename/path after /api/image/
+      // This can be a simple filename or a path like gallery-images/gallery-image/image-123.jpg
+      let filename = path.substring('/api/image/'.length);
+      
       // Handle query parameters if any
       if (filename.includes('?')) {
         filename = filename.split('?')[0];
       }
-      // URL decode the filename
+      
+      // URL decode the filename to handle encoded characters
+      // This will properly decode paths like gallery-images/gallery-image/image-123.jpg
       try {
         filename = decodeURIComponent(filename);
       } catch (e) {
         console.warn('Failed to decode filename, using as-is:', filename, e);
       }
+      
       return handleGetImage(filename, r2Bucket, corsHeaders);
     } else {
       return new Response(
@@ -234,13 +240,14 @@ async function handleUpload(request, r2Bucket, kvStore, corsHeaders) {
       }
       console.log('✅ Upload verified - object exists in R2:', r2Key, 'Size:', verify.size, 'bytes');
 
-      // Get public URL
-      const imageUrl = `/api/image/${r2Key}`;
+      // Get public URL - encode the R2 key to handle special characters and slashes
+      const encodedR2Key = encodeURIComponent(r2Key).replace(/%2F/g, '/'); // Keep slashes unencoded for path structure
+      const imageUrl = `/api/image/${r2Key}`; // Use original r2Key, the API will handle encoding
 
       // Store metadata in KV
       const metadata = {
         id: imageId,
-        fileName: r2Key, // Store full R2 key including directory
+        fileName: r2Key, // Store full R2 key including directory: gallery-images/gallery-image/image-123.jpg
         url: imageUrl,
         group: group,
         uploadedAt: new Date().toISOString(),

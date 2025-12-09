@@ -2,6 +2,7 @@
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_FILES = 100;
 const API_BASE = '/api';
+const API_BASE_URL = window.location.origin || 'http://localhost:8788'; // For constructing absolute URLs
 const GALLERY_PASSWORD = 'SSDA2025'; // Change this to your desired password
 
 // State
@@ -343,14 +344,64 @@ async function loadGallery() {
         Object.keys(groupedImages).sort().forEach(groupName => {
             const groupCard = document.createElement('div');
             groupCard.className = 'gallery-item-card';
-            groupCard.innerHTML = `
-                <img src="${groupedImages[groupName][0].url}" alt="${groupName}">
-                <div class="gallery-item-overlay">
-                    <h3 class="gallery-item-title">${groupName}</h3>
-                    <p class="gallery-item-count">${groupedImages[groupName].length} ${groupedImages[groupName].length === 1 ? 'image' : 'images'}</p>
-                </div>
-                <button class="gallery-item-delete" data-group="${groupName}" title="Delete group">🗑️</button>
+            
+            // Create cover image element
+            const coverImg = document.createElement('img');
+            const firstImage = groupedImages[groupName][0];
+            // Construct absolute URL from relative URL returned by API
+            // The API returns URLs like /api/image/gallery-images/gallery-image/image-123.jpg
+            // We need to ensure proper encoding for paths with slashes
+            let coverUrl = firstImage.url;
+            if (!coverUrl.startsWith('http')) {
+                // Ensure the path segments are properly encoded if needed
+                coverUrl = `${API_BASE_URL}${coverUrl}`;
+            }
+            coverImg.src = coverUrl;
+            coverImg.alt = groupName;
+            coverImg.loading = 'lazy';
+            coverImg.crossOrigin = 'anonymous'; // Help with CORS if needed
+            
+            // Error handling for image loading (like HomeMadeDelights)
+            coverImg.onerror = function() {
+                console.error('❌ Failed to load image:', this.src);
+                // Try to reload once after a delay
+                const originalSrc = this.src;
+                setTimeout(() => {
+                    if (this.src === originalSrc && !originalSrc.startsWith('data:')) {
+                        console.log('Retrying image load:', originalSrc);
+                        this.src = originalSrc + '?t=' + Date.now(); // Cache bust
+                    }
+                }, 1000);
+                // Fallback to placeholder
+                setTimeout(() => {
+                    if (this.naturalWidth === 0) {
+                        this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect fill="%23f0f0f0" width="400" height="400"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="18" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3EImage Error%3C/text%3E%3C/svg%3E';
+                    }
+                }, 2000);
+            };
+            coverImg.onload = function() {
+                console.log('✅ Successfully loaded image:', this.src, 'Dimensions:', this.naturalWidth, 'x', this.naturalHeight);
+            };
+            
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'gallery-item-overlay';
+            overlay.innerHTML = `
+                <h3 class="gallery-item-title">${groupName}</h3>
+                <p class="gallery-item-count">${groupedImages[groupName].length} ${groupedImages[groupName].length === 1 ? 'image' : 'images'}</p>
             `;
+            
+            // Create delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'gallery-item-delete';
+            deleteBtn.setAttribute('data-group', groupName);
+            deleteBtn.title = 'Delete group';
+            deleteBtn.innerHTML = '🗑️';
+            
+            // Assemble card
+            groupCard.appendChild(coverImg);
+            groupCard.appendChild(overlay);
+            groupCard.appendChild(deleteBtn);
             
             groupCard.addEventListener('click', (e) => {
                 if (e.target.classList.contains('gallery-item-delete')) {
@@ -388,10 +439,36 @@ function showSlideshow() {
     if (currentGroup.length === 0) return;
     
     const image = currentGroup[currentImageIndex];
-    slideshowImage.src = image.url;
+    // Construct absolute URL from relative URL returned by API
+    // The API returns URLs like /api/image/gallery-images/gallery-image/image-123.jpg
+    let imageUrl = image.url;
+    if (!imageUrl.startsWith('http')) {
+        imageUrl = `${API_BASE_URL}${imageUrl}`;
+    }
+    
+    console.log('Loading slideshow image:', imageUrl);
+    slideshowImage.src = imageUrl;
+    slideshowImage.alt = image.originalName || image.fileName || 'Gallery image';
+    slideshowImage.crossOrigin = 'anonymous'; // Help with CORS if needed
     slideshowCounter.textContent = `${currentImageIndex + 1} / ${currentGroup.length}`;
     slideshowModal.classList.add('active');
     document.body.classList.add('body-no-scroll');
+    
+    // Error handling for slideshow image
+    slideshowImage.onerror = function() {
+        console.error('❌ Failed to load slideshow image:', this.src);
+        // Try to reload once after a delay
+        const originalSrc = this.src;
+        setTimeout(() => {
+            if (this.src === originalSrc && !originalSrc.startsWith('data:')) {
+                console.log('Retrying slideshow image load:', originalSrc);
+                this.src = originalSrc + '?t=' + Date.now(); // Cache bust
+            }
+        }, 1000);
+    };
+    slideshowImage.onload = function() {
+        console.log('✅ Successfully loaded slideshow image:', this.src, 'Dimensions:', this.naturalWidth, 'x', this.naturalHeight);
+    };
     
     deleteImageBtn.onclick = () => {
         if (confirm('Delete this image?')) {
