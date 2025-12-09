@@ -1,9 +1,17 @@
 // Gallery Configuration
+console.log('🚀 Gallery.js script loaded!');
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_FILES = 100;
 const API_BASE = '/api';
 const API_BASE_URL = window.location.origin || 'http://localhost:8788'; // For constructing absolute URLs
 const GALLERY_PASSWORD = 'SSDA2025'; // Change this to your desired password
+
+console.log('📋 API Configuration:', {
+    API_BASE,
+    API_BASE_URL,
+    currentOrigin: window.location.origin,
+    uploadEndpoint: `${API_BASE}/upload`
+});
 
 // State
 let isAuthenticated = false;
@@ -53,6 +61,13 @@ const existingGroupSelect = document.getElementById('existing-group-select');
 
 // Check authentication on load
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ DOM Content Loaded - Gallery page ready');
+    console.log('🔍 Checking DOM elements:', {
+        uploadBtn: !!uploadBtn,
+        uploadArea: !!uploadArea,
+        fileInput: !!fileInput,
+        galleryGrid: !!galleryGrid
+    });
     const savedAuth = sessionStorage.getItem('gallery_authenticated');
     if (savedAuth === 'true') {
         isAuthenticated = true;
@@ -240,7 +255,15 @@ async function loadExistingGroups() {
 }
 
 // Upload Images
-uploadBtn.addEventListener('click', async () => {
+if (!uploadBtn) {
+    console.error('❌ Upload button not found! Check if element with id="upload-btn" exists.');
+} else {
+    console.log('✅ Upload button found, attaching event listener');
+}
+
+uploadBtn?.addEventListener('click', async () => {
+    console.log('🔵 Upload button clicked');
+    
     if (selectedFiles.length === 0) {
         alert('Please select at least one image to upload.');
         return;
@@ -261,6 +284,13 @@ uploadBtn.addEventListener('click', async () => {
         }
     }
     
+    console.log('📤 Starting upload:', {
+        files: selectedFiles.length,
+        group: groupTitle,
+        apiBase: API_BASE,
+        url: `${API_BASE}/upload`
+    });
+    
     uploadBtn.disabled = true;
     uploadProgress.style.display = 'block';
     progressFill.style.width = '0%';
@@ -277,29 +307,43 @@ uploadBtn.addEventListener('click', async () => {
     uploadSuccess.style.display = 'none';
     
     try {
+        console.log('🌐 Making fetch request to:', `${API_BASE}/upload`, 'Method: POST');
         const response = await fetch(`${API_BASE}/upload`, {
             method: 'POST',
             body: formData
         });
         
+        console.log('📥 Response received:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok,
+            headers: Object.fromEntries(response.headers.entries())
+        });
+        
         if (!response.ok) {
+            console.error('❌ Upload failed - Response not OK:', response.status, response.statusText);
+            
             // Try to get detailed error from response
             let errorMessage = 'Upload failed';
             let errorDetailsText = '';
             
             // Handle 405 Method Not Allowed specifically
             if (response.status === 405) {
+                console.error('⚠️ 405 Method Not Allowed error detected');
                 try {
                     const errorData = await response.json();
+                    console.error('Error response data:', errorData);
                     errorMessage = 'Method Not Allowed';
                     errorDetailsText = errorData.details || 'Upload endpoint requires POST method';
                 } catch (e) {
+                    console.error('Failed to parse error JSON:', e);
                     errorMessage = 'Method Not Allowed';
                     errorDetailsText = 'Upload endpoint requires POST method. Please ensure you are using the correct HTTP method.';
                 }
             } else {
                 try {
                     const errorData = await response.json();
+                    console.error('Error response data:', errorData);
                     errorMessage = errorData.error || errorMessage;
                     errorDetailsText = errorData.details || '';
                     
@@ -308,6 +352,7 @@ uploadBtn.addEventListener('click', async () => {
                         errorDetailsText += '\n\nRequired bindings:\n- R2: gallery-imagessda\n- KV: GALLERY_SSDA';
                     }
                 } catch (e) {
+                    console.error('Failed to parse error JSON:', e);
                     errorDetailsText = `HTTP ${response.status}: ${response.statusText}`;
                 }
             }
@@ -319,11 +364,13 @@ uploadBtn.addEventListener('click', async () => {
             uploadError.style.display = 'flex';
             uploadBtn.disabled = false;
             
-            console.error('Upload failed:', errorMessage, errorDetailsText);
+            console.error('❌ Upload failed - Final error:', errorMessage, errorDetailsText);
             return;
         }
         
         const result = await response.json();
+        console.log('✅ Upload successful!', result);
+        
         progressFill.style.width = '100%';
         progressText.textContent = 'Upload complete!';
         
@@ -344,7 +391,12 @@ uploadBtn.addEventListener('click', async () => {
         }, 500);
         
     } catch (error) {
-        console.error('Upload error:', error);
+        console.error('💥 Upload error (catch block):', error);
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        });
         
         // Show detailed error message
         errorTitle.textContent = 'Network Error';
