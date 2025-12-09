@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "description": "Student Self Defense Advocates Website",
   "scripts": {
-    "start": "http-server -p 8080 -o"
+    "start": "live-server --port=8080 --open=/ --watch=.",
+    "serve": "http-server -p 8080 -o -c-1"
   },
   "devDependencies": {
-    "http-server": "^14.1.1"
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2"
   }
 }
+
 
 
 
