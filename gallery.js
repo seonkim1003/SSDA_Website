@@ -315,8 +315,40 @@ async function loadGallery() {
     
     try {
         const response = await fetch(`${API_BASE}/gallery`);
+        
         if (!response.ok) {
-            throw new Error('Failed to load gallery');
+            let errorMessage = 'Failed to load gallery';
+            let errorDetails = '';
+            
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.error || errorMessage;
+                errorDetails = errorData.details || '';
+                
+                // Check for binding errors
+                if (errorMessage.includes('binding') || errorMessage.includes('R2') || errorMessage.includes('KV')) {
+                    errorDetails += '\n\nRequired bindings:\n- R2: gallery-imagessda\n- KV: GALLERY_SSDA';
+                }
+            } catch (e) {
+                errorDetails = `HTTP ${response.status}: ${response.statusText}`;
+            }
+            
+            loadingSpinner.style.display = 'none';
+            galleryGrid.innerHTML = `
+                <div class="gallery-error" style="text-align: center; padding: 40px; color: var(--error-color, #e74c3c);">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 20px;">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <h3 style="margin-bottom: 10px;">Error Loading Gallery</h3>
+                    <p style="margin-bottom: 15px; font-weight: bold;">${errorMessage}</p>
+                    ${errorDetails ? `<pre style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 8px; text-align: left; white-space: pre-wrap; font-size: 12px;">${errorDetails}</pre>` : ''}
+                    <p style="margin-top: 20px; font-size: 14px; opacity: 0.8;">Check browser console (F12) for more details</p>
+                </div>
+            `;
+            console.error('Gallery load error:', errorMessage, errorDetails);
+            return;
         }
         
         const data = await response.json();
@@ -361,20 +393,58 @@ async function loadGallery() {
             coverImg.loading = 'lazy';
             coverImg.crossOrigin = 'anonymous'; // Help with CORS if needed
             
-            // Error handling for image loading (like HomeMadeDelights)
-            coverImg.onerror = function() {
-                console.error('❌ Failed to load image:', this.src);
-                // Try to reload once after a delay
+            // Error handling for image loading with visible error messages
+            coverImg.onerror = async function() {
                 const originalSrc = this.src;
+                console.error('❌ Failed to load image:', originalSrc);
+                
+                // Show error message in overlay
+                const errorOverlay = document.createElement('div');
+                errorOverlay.className = 'image-error-overlay';
+                errorOverlay.innerHTML = `
+                    <div class="image-error-message">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                            <line x1="12" y1="8" x2="12" y2="12" stroke-width="2"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2"/>
+                        </svg>
+                        <p>Image failed to load</p>
+                        <small>Check console for details</small>
+                    </div>
+                `;
+                groupCard.appendChild(errorOverlay);
+                
+                // Try to diagnose the issue
+                try {
+                    const testResponse = await fetch(originalSrc, { method: 'HEAD' });
+                    if (testResponse.status === 404) {
+                        errorOverlay.querySelector('p').textContent = 'Image not found (404)';
+                        errorOverlay.querySelector('small').textContent = 'Image may have been deleted or R2 binding issue';
+                    } else if (testResponse.status === 500) {
+                        errorOverlay.querySelector('p').textContent = 'Server error (500)';
+                        errorOverlay.querySelector('small').textContent = 'R2 binding may not be configured. Check: gallery-imagessda';
+                    } else if (!testResponse.ok) {
+                        errorOverlay.querySelector('p').textContent = `Error ${testResponse.status}`;
+                        errorOverlay.querySelector('small').textContent = testResponse.statusText || 'Unknown error';
+                    }
+                } catch (fetchError) {
+                    errorOverlay.querySelector('p').textContent = 'Network error';
+                    errorOverlay.querySelector('small').textContent = 'Check internet connection or CORS settings';
+                    console.error('Image fetch error:', fetchError);
+                }
+                
+                // Try to reload once after a delay
                 setTimeout(() => {
                     if (this.src === originalSrc && !originalSrc.startsWith('data:')) {
                         console.log('Retrying image load:', originalSrc);
+                        errorOverlay.remove();
                         this.src = originalSrc + '?t=' + Date.now(); // Cache bust
                     }
                 }, 1000);
+                
                 // Fallback to placeholder
                 setTimeout(() => {
-                    if (this.naturalWidth === 0) {
+                    if (this.naturalWidth === 0 && this.src !== 'data:') {
                         this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect fill="%23f0f0f0" width="400" height="400"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="18" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3EImage Error%3C/text%3E%3C/svg%3E';
                     }
                 }, 2000);
@@ -420,7 +490,26 @@ async function loadGallery() {
     } catch (error) {
         console.error('Error loading gallery:', error);
         loadingSpinner.style.display = 'none';
-        galleryGrid.innerHTML = '<p style="text-align: center; color: var(--text-color);">Error loading gallery. Please try again.</p>';
+        galleryGrid.innerHTML = `
+            <div class="gallery-error" style="text-align: center; padding: 40px; color: var(--error-color, #e74c3c);">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 20px;">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <h3 style="margin-bottom: 10px;">Network Error</h3>
+                <p style="margin-bottom: 15px; font-weight: bold;">${error.message || 'Failed to connect to server'}</p>
+                <pre style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 8px; text-align: left; white-space: pre-wrap; font-size: 12px; margin-top: 15px;">
+Possible causes:
+- Network connection issue
+- Server is down
+- CORS configuration issue
+- API endpoint not available
+
+Check browser console (F12) for detailed error information.
+                </pre>
+            </div>
+        `;
     }
 }
 
@@ -454,14 +543,48 @@ function showSlideshow() {
     slideshowModal.classList.add('active');
     document.body.classList.add('body-no-scroll');
     
-    // Error handling for slideshow image
-    slideshowImage.onerror = function() {
-        console.error('❌ Failed to load slideshow image:', this.src);
-        // Try to reload once after a delay
+    // Error handling for slideshow image with visible error
+    slideshowImage.onerror = async function() {
         const originalSrc = this.src;
+        console.error('❌ Failed to load slideshow image:', originalSrc);
+        
+        // Show error message in slideshow
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'slideshow-error-message';
+        errorMsg.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 8px; text-align: center; z-index: 1000;';
+        errorMsg.innerHTML = `
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 10px;">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <p style="margin: 10px 0; font-weight: bold;">Image failed to load</p>
+            <small id="slideshow-error-details" style="display: block; margin-top: 5px; opacity: 0.9;">Diagnosing issue...</small>
+        `;
+        slideshowModal.appendChild(errorMsg);
+        
+        // Try to diagnose the issue
+        try {
+            const testResponse = await fetch(originalSrc, { method: 'HEAD' });
+            const detailsEl = document.getElementById('slideshow-error-details');
+            if (testResponse.status === 404) {
+                detailsEl.textContent = 'Image not found (404). May have been deleted.';
+            } else if (testResponse.status === 500) {
+                detailsEl.textContent = 'Server error. Check R2 binding: gallery-imagessda';
+            } else if (!testResponse.ok) {
+                detailsEl.textContent = `Error ${testResponse.status}: ${testResponse.statusText}`;
+            }
+        } catch (fetchError) {
+            const detailsEl = document.getElementById('slideshow-error-details');
+            detailsEl.textContent = 'Network error or CORS issue';
+            console.error('Slideshow image fetch error:', fetchError);
+        }
+        
+        // Try to reload once after a delay
         setTimeout(() => {
             if (this.src === originalSrc && !originalSrc.startsWith('data:')) {
                 console.log('Retrying slideshow image load:', originalSrc);
+                errorMsg.remove();
                 this.src = originalSrc + '?t=' + Date.now(); // Cache bust
             }
         }, 1000);

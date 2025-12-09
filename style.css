@@ -990,6 +990,113 @@ footer p {
     transform: scale(1.1);
 }
 
+/* Image Error Overlay */
+.image-error-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(231, 76, 60, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    border-radius: 16px;
+}
+
+.image-error-message {
+    text-align: center;
+    color: white;
+    padding: 20px;
+}
+
+.image-error-message svg {
+    margin-bottom: 12px;
+    opacity: 0.9;
+}
+
+.image-error-message p {
+    margin: 8px 0 4px 0;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.image-error-message small {
+    display: block;
+    opacity: 0.9;
+    font-size: 0.85rem;
+    margin-top: 8px;
+}
+
+/* Gallery Error Display */
+.gallery-error {
+    text-align: center;
+    padding: 40px 20px;
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+    border-radius: 16px;
+    border: 2px solid rgba(231, 76, 60, 0.3);
+}
+
+.gallery-error svg {
+    margin-bottom: 20px;
+    color: #e74c3c;
+}
+
+.gallery-error h3 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+    color: #e74c3c;
+}
+
+.gallery-error pre {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: left;
+    white-space: pre-wrap;
+    font-size: 12px;
+    margin-top: 15px;
+    color: #2c3e50;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* Slideshow Error Message */
+.slideshow-error-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    z-index: 1000;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.slideshow-error-message svg {
+    margin-bottom: 15px;
+    opacity: 0.9;
+}
+
+.slideshow-error-message p {
+    margin: 10px 0;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.slideshow-error-message small {
+    display: block;
+    margin-top: 8px;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
 /* Loading & Empty States */
 .gallery-loading {
     display: flex;

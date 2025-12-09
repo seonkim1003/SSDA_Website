@@ -88,10 +88,26 @@ export async function onRequest(context) {
     const kvStore = getKVBinding(env);
 
     if (!r2Bucket || !kvStore) {
+      const allEnvKeys = Object.keys(env);
+      const missingBindings = [];
+      if (!r2Bucket) missingBindings.push('R2 binding: gallery-imagessda');
+      if (!kvStore) missingBindings.push('KV binding: GALLERY_SSDA');
+      
       return new Response(
         JSON.stringify({ 
           error: 'R2 or KV bindings not configured',
-          details: `R2 binding 'gallery-imagessda' and KV binding 'GALLERY_SSDA' must be configured in Cloudflare Pages settings`
+          details: `Missing bindings: ${missingBindings.join(', ')}`,
+          troubleshooting: [
+            '1. Go to Cloudflare Dashboard → Pages → Your Site → Settings → Functions',
+            '2. Add R2 Bucket binding:',
+            '   - Variable name: gallery-imagessda (exact match, with hyphen)',
+            '   - Select your R2 bucket',
+            '3. Add KV Namespace binding:',
+            '   - Variable name: GALLERY_SSDA (exact match, all caps)',
+            '   - Select your KV namespace',
+            '4. Save and REDEPLOY your site (bindings only work after redeployment)',
+            '5. Available environment keys: ' + allEnvKeys.join(', ')
+          ].join('\n')
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -483,10 +499,21 @@ async function handleGetImage(filename, r2Bucket, corsHeaders) {
   try {
     if (!r2Bucket) {
       console.error('R2 binding not available for image:', filename);
-      return new Response('R2 binding not configured', {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
-      });
+      return new Response(
+        JSON.stringify({ 
+          error: 'R2 binding not configured',
+          details: 'Required R2 binding: gallery-imagessda',
+          troubleshooting: [
+            'Configure R2 binding in Cloudflare Pages:',
+            'Settings → Functions → Bindings → Add R2 Bucket',
+            'Variable name: gallery-imagessda (exact match)'
+          ].join('\n')
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
     
     // The filename from URL should include gallery-images/gallery-image/ prefix
@@ -539,7 +566,23 @@ async function handleGetImage(filename, r2Bucket, corsHeaders) {
 
     if (!object) {
       console.warn('⚠️ Image not found in R2:', r2Key);
-      return new Response('Image not found', { status: 404, headers: corsHeaders });
+      return new Response(
+        JSON.stringify({ 
+          error: 'Image not found',
+          details: `Image "${r2Key}" not found in R2 bucket`,
+          troubleshooting: [
+            'Possible causes:',
+            '1. Image was deleted',
+            '2. Image was never uploaded successfully',
+            '3. R2 key path mismatch',
+            '4. Check R2 bucket: gallery-imagessda'
+          ].join('\n')
+        }),
+        { 
+          status: 404, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
 
     // Determine Content-Type (from metadata or file extension)
