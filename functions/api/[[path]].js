@@ -317,8 +317,8 @@ async function handleUpload(request, r2Bucket, kvStore, corsHeaders) {
       const imageId = `${Date.now()}-${i}-${Math.random().toString(36).substring(2, 15)}`;
       const fileExtension = imageFile.name.split('.').pop() || 'jpg';
       const imageName = `image-${imageId}.${fileExtension}`;
-      // Store in R2 with gallery-images/gallery-image/ directory structure (like HomeMadeDelights)
-      const r2Key = `gallery-images/gallery-image/${imageName}`;
+      // Store in R2 with gallery-imagessda/ directory structure
+      const r2Key = `gallery-imagessda/${imageName}`;
 
       // Convert File to ArrayBuffer (R2 requires ArrayBuffer/Blob/Stream)
       let fileBody;
@@ -375,7 +375,7 @@ async function handleUpload(request, r2Bucket, kvStore, corsHeaders) {
       // Store metadata in KV
       const metadata = {
         id: imageId,
-        fileName: r2Key, // Store full R2 key including directory: gallery-images/gallery-image/image-123.jpg
+        fileName: r2Key, // Store full R2 key including directory: gallery-imagessda/image-123.jpg
         url: imageUrl,
         group: group,
         uploadedAt: new Date().toISOString(),
@@ -634,21 +634,30 @@ async function handleGetImage(filename, r2Bucket, corsHeaders) {
       );
     }
     
-    // The filename from URL should include gallery-images/gallery-image/ prefix
-    // Handle backward compatibility with old formats (like HomeMadeDelights)
+    // The filename from URL should include gallery-imagessda/ prefix
+    // Handle backward compatibility with old formats
     let r2Key = filename;
-    if (!filename.startsWith('gallery-images/gallery-image/')) {
+    if (!filename.startsWith('gallery-imagessda/')) {
       // Try different formats for backward compatibility
-      if (filename.startsWith('gallery-images/')) {
-        r2Key = filename.replace(/^gallery-images\//, 'gallery-images/gallery-image/');
-        console.log('🔍 Updating path to full structure:', r2Key);
+      if (filename.startsWith('gallery-images/gallery-image/')) {
+        // Old format: gallery-images/gallery-image/image-123.jpg -> gallery-imagessda/image-123.jpg
+        const imageName = filename.replace('gallery-images/gallery-image/', '');
+        r2Key = `gallery-imagessda/${imageName}`;
+        console.log('🔍 Converting old format to gallery-imagessda:', r2Key);
+      } else if (filename.startsWith('gallery-images/')) {
+        // Old format: gallery-images/image-123.jpg -> gallery-imagessda/image-123.jpg
+        const imageName = filename.replace('gallery-images/', '');
+        r2Key = `gallery-imagessda/${imageName}`;
+        console.log('🔍 Converting old format to gallery-imagessda:', r2Key);
       } else if (filename.startsWith('gallery-image/')) {
-        r2Key = filename.replace(/^gallery-image\//, 'gallery-images/gallery-image/');
-        console.log('🔍 Updating old path to new nested structure:', r2Key);
+        // Old format: gallery-image/image-123.jpg -> gallery-imagessda/image-123.jpg
+        const imageName = filename.replace('gallery-image/', '');
+        r2Key = `gallery-imagessda/${imageName}`;
+        console.log('🔍 Converting old format to gallery-imagessda:', r2Key);
       } else {
-        // No prefix, add the full nested structure
-        r2Key = `gallery-images/gallery-image/${filename}`;
-        console.log('🔍 Adding full nested path:', r2Key);
+        // No prefix, add the gallery-imagessda/ directory
+        r2Key = `gallery-imagessda/${filename}`;
+        console.log('🔍 Adding gallery-imagessda/ directory:', r2Key);
       }
     } else {
       console.log('🔍 Fetching image from R2:', r2Key);
@@ -659,17 +668,19 @@ async function handleGetImage(filename, r2Bucket, corsHeaders) {
     
     // Backward compatibility: try old formats if not found
     if (!object) {
-      // Try gallery-images/ (without gallery-image/)
-      if (r2Key.startsWith('gallery-images/gallery-image/')) {
-        const fallbackKey = r2Key.replace('gallery-images/gallery-image/', 'gallery-images/');
-        console.log('⚠️ Not found with nested path, trying gallery-images/:', fallbackKey);
+      // Try old gallery-images/gallery-image/ format
+      if (r2Key.startsWith('gallery-imagessda/')) {
+        const imageName = r2Key.replace('gallery-imagessda/', '');
+        const fallbackKey = `gallery-images/gallery-image/${imageName}`;
+        console.log('⚠️ Not found, trying old nested format:', fallbackKey);
         object = await r2Bucket.get(fallbackKey);
         if (object) r2Key = fallbackKey;
       }
-      // Try gallery-image/ (old format)
-      if (!object && r2Key.includes('gallery-images/')) {
-        const fallbackKey = r2Key.replace('gallery-images/', 'gallery-image/');
-        console.log('⚠️ Not found, trying old gallery-image/ format:', fallbackKey);
+      // Try gallery-images/ format
+      if (!object && r2Key.startsWith('gallery-imagessda/')) {
+        const imageName = r2Key.replace('gallery-imagessda/', '');
+        const fallbackKey = `gallery-images/${imageName}`;
+        console.log('⚠️ Not found, trying old gallery-images/ format:', fallbackKey);
         object = await r2Bucket.get(fallbackKey);
         if (object) r2Key = fallbackKey;
       }
