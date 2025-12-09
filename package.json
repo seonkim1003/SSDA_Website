@@ -1,0 +1,14 @@
+{
+  "name": "ssda-website",
+  "version": "1.0.0",
+  "description": "Student Self Defense Advocates Website",
+  "scripts": {
+    "start": "http-server -p 8080 -o"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
+
+
+

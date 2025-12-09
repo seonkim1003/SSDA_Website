@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - SSDA</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="assets/logo.png" type="image/png">
+    <script src="translations.js"></script>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav>
+        <a href="index.html" class="nav-logo">
+            <img src="assets/logo.png" alt="SSDA Logo">
+            <span data-translate-brand>Student Self Defense Advocates</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html" data-translate="Home">Home</a></li>
+            <li><a href="about.html" data-translate="About Us">About Us</a></li>
+            <li><a href="donate.html" data-translate="Donate">Donate</a></li>
+            <li><a href="contact.html" data-translate="Contact">Contact</a></li>
+            <li><a href="join.html" data-translate="Join Us">Join Us</a></li>
+            <li><a href="gallery.html" class="active" data-translate="Gallery">Gallery</a></li>
+            <li class="language-switcher">
+                <div class="language-select-wrapper">
+                    <select id="language-select">
+                        <option value="en">English</option>
+                        <option value="ko">Korean</option>
+                    </select>
+                </div>
+            </li>
+        </ul>
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+    </nav>
+
+    <!-- Password Protection Modal -->
+    <div class="password-modal" id="password-modal">
+        <div class="password-modal-content">
+            <h2 data-translate="Gallery Access">Gallery Access</h2>
+            <p data-translate="Please enter the password to access the gallery">Please enter the password to access the gallery</p>
+            <input type="password" id="password-input" class="password-input" placeholder="Enter password" autocomplete="off">
+            <p class="password-error" id="password-error" style="display: none; color: #dc3545; margin-top: 10px; font-size: 14px;"></p>
+            <button class="btn btn-primary" id="password-submit-btn" data-translate="Submit">Submit</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="gallery-main-content" style="display: none;">
+        <section class="page-section">
+            <div class="container">
+                <h2 data-translate="Our Gallery">Our Gallery</h2>
+                <p class="section-intro" data-translate="Share your moments with us! Upload your favorite photos and browse through our community gallery.">Share your moments with us! Upload your favorite photos and browse through our community gallery.</p>
+
+                <!-- Upload Section -->
+                <div class="upload-section fade-in">
+                    <div class="upload-container">
+                        <div class="upload-area" id="upload-area">
+                            <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
+                            <div class="upload-content">
+                                <svg class="upload-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <h3 data-translate="Upload Images">Upload Images</h3>
+                                <p data-translate="Drag and drop images here or click to browse">Drag and drop images here or click to browse</p>
+                                <p class="upload-hint" data-translate="You can select multiple images at once">You can select multiple images at once</p>
+                            </div>
+                        </div>
+                        <div class="preview-container" id="preview-container" style="display: none;">
+                            <div class="preview-header">
+                                <h4 data-translate="Selected Images">Selected Images</h4>
+                                <button class="btn-clear" id="clear-preview" data-translate="Clear All">Clear All</button>
+                            </div>
+                            <div class="preview-grid" id="preview-grid"></div>
+                            
+                            <!-- Group Selection -->
+                            <div class="group-selection">
+                                <h4 data-translate="Add to Group">Add to Group</h4>
+                                <div class="group-options">
+                                    <label>
+                                        <input type="radio" name="group-option" value="new" id="new-group-radio" checked>
+                                        <span data-translate="Create New Group">Create New Group</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="group-option" value="existing" id="existing-group-radio">
+                                        <span data-translate="Add to Existing Group">Add to Existing Group</span>
+                                    </label>
+                                </div>
+                                <div class="group-input-container">
+                                    <input type="text" id="group-title-input" class="group-input" data-translate-placeholder="Enter group title..." placeholder="Enter group title...">
+                                    <select id="existing-group-select" class="group-select" style="display: none;">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary" id="upload-btn" data-translate="Upload Images">Upload Images</button>
+                        </div>
+                        <div class="upload-progress" id="upload-progress" style="display: none;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <p class="progress-text" id="progress-text" data-translate="Uploading...">Uploading...</p>
+                        </div>
+                        <div class="upload-success" id="upload-success" style="display: none;">
+                            <p class="success-message" id="success-message" data-translate="✓ Upload successful! Refreshing gallery...">✓ Upload successful! Refreshing gallery...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gallery Grid -->
+                <div class="gallery-section fade-in">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <h3 style="margin: 0;" data-translate="Community Gallery">Community Gallery</h3>
+                        <button class="btn btn-secondary" id="refresh-gallery-btn" style="padding: 8px 16px; font-size: 14px;" data-translate="Refresh">Refresh</button>
+                    </div>
+                    <div class="gallery-grid" id="gallery-grid">
+                        <div class="loading-spinner" id="loading-spinner">
+                            <div class="spinner"></div>
+                            <p data-translate="Loading images...">Loading images...</p>
+                        </div>
+                    </div>
+                    <div class="empty-gallery" id="empty-gallery" style="display: none;">
+                        <p data-translate="No images uploaded yet. Be the first to share!">No images uploaded yet. Be the first to share!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Slideshow Modal -->
+    <div class="slideshow-modal" id="slideshow-modal">
+        <button class="slideshow-close" id="slideshow-close" aria-label="Close slideshow">×</button>
+        <button class="slideshow-nav slideshow-prev" id="slideshow-prev" aria-label="Previous image">‹</button>
+        <button class="slideshow-nav slideshow-next" id="slideshow-next" aria-label="Next image">›</button>
+        <div class="slideshow-content">
+            <img id="slideshow-image" src="" alt="Gallery image">
+            <div class="slideshow-info">
+                <p class="slideshow-counter" id="slideshow-counter"></p>
+                <button class="delete-image-btn" id="delete-image-btn" title="Delete this image" data-translate="Delete">🗑️ Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p data-translate="© 2025 Student Self Defense Advocates - A Student-led Project of Next Generation Advocates">© 2025 Student Self Defense Advocates - A Student-led Project of Next Generation Advocates</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="gallery.js"></script>
+</body>
+</html>
+
