@@ -33,6 +33,8 @@ const galleryGrid = document.getElementById('gallery-grid');
 const loadingSpinner = document.getElementById('loading-spinner');
 const emptyGallery = document.getElementById('empty-gallery');
 const refreshGalleryBtn = document.getElementById('refresh-gallery-btn');
+const newGroupTab = document.querySelector('.group-tab:has(input[value="new"])');
+const existingGroupTab = document.querySelector('.group-tab:has(input[value="existing"])');
 const slideshowModal = document.getElementById('slideshow-modal');
 const slideshowImage = document.getElementById('slideshow-image');
 const slideshowClose = document.getElementById('slideshow-close');
@@ -145,15 +147,25 @@ function handleFiles(files) {
 }
 
 function updatePreview() {
+    const previewCountEl = document.getElementById('preview-count');
+    
     if (selectedFiles.length === 0) {
         previewContainer.style.display = 'none';
         previewFiles = [];
+        if (previewCountEl) {
+            previewCountEl.textContent = '';
+        }
         return;
     }
     
     previewContainer.style.display = 'block';
     previewGrid.innerHTML = '';
     previewFiles = [];
+    
+    // Update preview count
+    if (previewCountEl) {
+        previewCountEl.textContent = selectedFiles.length;
+    }
     
     selectedFiles.forEach((file, index) => {
         const reader = new FileReader();
@@ -191,6 +203,8 @@ newGroupRadio.addEventListener('change', () => {
         groupTitleInput.style.display = 'block';
         existingGroupSelect.style.display = 'none';
         groupTitleInput.value = '';
+        if (newGroupTab) newGroupTab.classList.add('active');
+        if (existingGroupTab) existingGroupTab.classList.remove('active');
     }
 });
 
@@ -198,6 +212,8 @@ existingGroupRadio.addEventListener('change', () => {
     if (existingGroupRadio.checked) {
         groupTitleInput.style.display = 'none';
         existingGroupSelect.style.display = 'block';
+        if (newGroupTab) newGroupTab.classList.remove('active');
+        if (existingGroupTab) existingGroupTab.classList.add('active');
     }
 });
 
@@ -269,6 +285,7 @@ uploadBtn.addEventListener('click', async () => {
         setTimeout(() => {
             uploadProgress.style.display = 'none';
             uploadSuccess.style.display = 'block';
+            uploadSuccess.classList.add('success');
             selectedFiles = [];
             fileInput.value = '';
             updatePreview();
@@ -325,18 +342,18 @@ async function loadGallery() {
         // Display groups
         Object.keys(groupedImages).sort().forEach(groupName => {
             const groupCard = document.createElement('div');
-            groupCard.className = 'group-card';
+            groupCard.className = 'gallery-item-card';
             groupCard.innerHTML = `
-                <img src="${groupedImages[groupName][0].url}" alt="${groupName}" class="group-cover">
-                <div class="group-info">
-                    <h3 class="group-title">${groupName}</h3>
-                    <p class="group-count">${groupedImages[groupName].length} ${groupedImages[groupName].length === 1 ? 'image' : 'images'}</p>
+                <img src="${groupedImages[groupName][0].url}" alt="${groupName}">
+                <div class="gallery-item-overlay">
+                    <h3 class="gallery-item-title">${groupName}</h3>
+                    <p class="gallery-item-count">${groupedImages[groupName].length} ${groupedImages[groupName].length === 1 ? 'image' : 'images'}</p>
                 </div>
-                <button class="delete-group-btn" data-group="${groupName}" title="Delete group">🗑️</button>
+                <button class="gallery-item-delete" data-group="${groupName}" title="Delete group">🗑️</button>
             `;
             
             groupCard.addEventListener('click', (e) => {
-                if (e.target.classList.contains('delete-group-btn')) {
+                if (e.target.classList.contains('gallery-item-delete')) {
                     e.stopPropagation();
                     if (confirm(`Delete all images in "${groupName}"?`)) {
                         deleteGroup(groupName);
