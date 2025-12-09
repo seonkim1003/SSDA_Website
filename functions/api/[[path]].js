@@ -322,31 +322,40 @@ async function handleUpload(request, r2Bucket, kvStore, corsHeaders) {
     const uploadedImages = [];
 
     for (let i = 0; i < images.length; i++) {
-      const imageFile = images[i];
+      const imageEntry = images[i];
       
-      // Check if it's a valid file-like object (File or Blob)
-      // Cloudflare Workers might use Blob instead of File
-      if (!imageFile) {
+      // Check if it's a valid file-like object
+      // In Cloudflare Workers, FormDataEntryValue can be string or File
+      if (!imageEntry) {
         console.warn(`⚠️ Image ${i} is null or undefined`);
         continue;
       }
       
-      const isFile = imageFile instanceof File;
-      const isBlob = imageFile instanceof Blob;
+      // Skip if it's a string (not a file)
+      if (typeof imageEntry === 'string') {
+        console.warn(`⚠️ Image ${i} is a string, not a file. Skipping.`);
+        continue;
+      }
+      
+      // Check if it's a File or Blob
+      const isFile = imageEntry instanceof File;
+      const isBlob = imageEntry instanceof Blob;
       
       if (!isFile && !isBlob) {
         console.error(`❌ Image ${i} is not a File or Blob:`, {
-          type: typeof imageFile,
-          constructor: imageFile.constructor?.name,
-          value: imageFile
+          type: typeof imageEntry,
+          constructor: imageEntry.constructor?.name,
+          value: imageEntry
         });
         continue;
       }
       
+      const imageFile = imageEntry; // Use for clarity
+      
       console.log(`✅ Processing image ${i}:`, {
-        name: imageFile.name,
-        type: imageFile.type,
-        size: imageFile.size,
+        name: imageFile.name || 'unnamed',
+        type: imageFile.type || 'unknown',
+        size: imageFile.size || 0,
         isFile: isFile,
         isBlob: isBlob
       });

@@ -297,10 +297,28 @@ uploadBtn?.addEventListener('click', async () => {
     progressText.textContent = 'Uploading...';
     
     const formData = new FormData();
-    selectedFiles.forEach(({ file }) => {
-        formData.append('images', file);
+    console.log('📦 Preparing FormData:', {
+        selectedFilesCount: selectedFiles.length,
+        selectedFilesTypes: selectedFiles.map(f => ({
+            name: f.name,
+            type: f.type,
+            size: f.size,
+            isFile: f instanceof File
+        }))
+    });
+    
+    // selectedFiles is an array of File objects directly, not objects with {file} property
+    selectedFiles.forEach((file) => {
+        if (file instanceof File) {
+            formData.append('images', file);
+            console.log('✅ Added file to FormData:', file.name);
+        } else {
+            console.error('❌ Invalid file object:', file);
+        }
     });
     formData.append('group', groupTitle);
+    
+    console.log('📋 FormData prepared, sending to:', `${API_BASE}/upload`);
     
     // Hide any previous errors
     uploadError.style.display = 'none';
