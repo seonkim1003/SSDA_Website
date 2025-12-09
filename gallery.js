@@ -287,17 +287,29 @@ uploadBtn.addEventListener('click', async () => {
             let errorMessage = 'Upload failed';
             let errorDetailsText = '';
             
-            try {
-                const errorData = await response.json();
-                errorMessage = errorData.error || errorMessage;
-                errorDetailsText = errorData.details || '';
-                
-                // Check for binding errors
-                if (errorMessage.includes('binding') || errorMessage.includes('R2') || errorMessage.includes('KV')) {
-                    errorDetailsText += '\n\nRequired bindings:\n- R2: gallery-imagessda\n- KV: GALLERY_SSDA';
+            // Handle 405 Method Not Allowed specifically
+            if (response.status === 405) {
+                try {
+                    const errorData = await response.json();
+                    errorMessage = 'Method Not Allowed';
+                    errorDetailsText = errorData.details || 'Upload endpoint requires POST method';
+                } catch (e) {
+                    errorMessage = 'Method Not Allowed';
+                    errorDetailsText = 'Upload endpoint requires POST method. Please ensure you are using the correct HTTP method.';
                 }
-            } catch (e) {
-                errorDetailsText = `HTTP ${response.status}: ${response.statusText}`;
+            } else {
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorMessage;
+                    errorDetailsText = errorData.details || '';
+                    
+                    // Check for binding errors
+                    if (errorMessage.includes('binding') || errorMessage.includes('R2') || errorMessage.includes('KV')) {
+                        errorDetailsText += '\n\nRequired bindings:\n- R2: gallery-imagessda\n- KV: GALLERY_SSDA';
+                    }
+                } catch (e) {
+                    errorDetailsText = `HTTP ${response.status}: ${response.statusText}`;
+                }
             }
             
             // Show error message
@@ -357,17 +369,29 @@ async function loadGallery() {
             let errorMessage = 'Failed to load gallery';
             let errorDetails = '';
             
-            try {
-                const errorData = await response.json();
-                errorMessage = errorData.error || errorMessage;
-                errorDetails = errorData.details || '';
-                
-                // Check for binding errors
-                if (errorMessage.includes('binding') || errorMessage.includes('R2') || errorMessage.includes('KV')) {
-                    errorDetails += '\n\nRequired bindings:\n- R2: gallery-imagessda\n- KV: GALLERY_SSDA';
+            // Handle 405 Method Not Allowed specifically
+            if (response.status === 405) {
+                try {
+                    const errorData = await response.json();
+                    errorMessage = 'Method Not Allowed';
+                    errorDetails = errorData.details || 'Invalid HTTP method used';
+                } catch (e) {
+                    errorMessage = 'Method Not Allowed';
+                    errorDetails = 'Gallery endpoint requires GET method. Please ensure you are using the correct HTTP method.';
                 }
-            } catch (e) {
-                errorDetails = `HTTP ${response.status}: ${response.statusText}`;
+            } else {
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorMessage;
+                    errorDetails = errorData.details || '';
+                    
+                    // Check for binding errors
+                    if (errorMessage.includes('binding') || errorMessage.includes('R2') || errorMessage.includes('KV')) {
+                        errorDetails += '\n\nRequired bindings:\n- R2: gallery-imagessda\n- KV: GALLERY_SSDA';
+                    }
+                } catch (e) {
+                    errorDetails = `HTTP ${response.status}: ${response.statusText}`;
+                }
             }
             
             loadingSpinner.style.display = 'none';
@@ -690,14 +714,31 @@ async function deleteImage(imageId) {
         });
         
         if (!response.ok) {
-            throw new Error('Delete failed');
+            // Handle specific error responses
+            let errorMessage = 'Delete failed';
+            if (response.status === 405) {
+                try {
+                    const errorData = await response.json();
+                    errorMessage = `Method Not Allowed: ${errorData.details || 'Invalid HTTP method'}`;
+                } catch (e) {
+                    errorMessage = 'Invalid HTTP method for delete operation';
+                }
+            } else {
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorData.details || errorMessage;
+                } catch (e) {
+                    errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                }
+            }
+            throw new Error(errorMessage);
         }
         
         hideSlideshow();
         loadGallery();
     } catch (error) {
         console.error('Delete error:', error);
-        alert('Failed to delete image. Please try again.');
+        alert(`Failed to delete image: ${error.message || 'Unknown error'}`);
     }
 }
 
@@ -708,13 +749,30 @@ async function deleteGroup(groupName) {
         });
         
         if (!response.ok) {
-            throw new Error('Delete failed');
+            // Handle specific error responses
+            let errorMessage = 'Delete failed';
+            if (response.status === 405) {
+                try {
+                    const errorData = await response.json();
+                    errorMessage = `Method Not Allowed: ${errorData.details || 'Invalid HTTP method'}`;
+                } catch (e) {
+                    errorMessage = 'Invalid HTTP method for delete operation';
+                }
+            } else {
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorData.details || errorMessage;
+                } catch (e) {
+                    errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                }
+            }
+            throw new Error(errorMessage);
         }
         
         loadGallery();
     } catch (error) {
         console.error('Delete error:', error);
-        alert('Failed to delete group. Please try again.');
+        alert(`Failed to delete group: ${error.message || 'Unknown error'}`);
     }
 }
 

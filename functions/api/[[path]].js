@@ -69,6 +69,9 @@ export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
   const path = url.pathname;
+  
+  // Log request method for debugging
+  console.log('📥 Request:', request.method, path);
 
   // CORS headers
   const corsHeaders = {
@@ -114,19 +117,128 @@ export async function onRequest(context) {
     }
 
     // Route handlers (using full path like HomeMadeDelights)
-    if (path === '/api/upload' && request.method === 'POST') {
+    // Check for method mismatches first to return proper 405 errors
+    
+    if (path === '/api/upload') {
+      console.log('🔍 Upload endpoint - Received method:', request.method, 'Expected: POST');
+      if (request.method !== 'POST') {
+        console.warn('❌ Method mismatch for /api/upload:', request.method);
+        return new Response(
+          JSON.stringify({ 
+            error: 'Method Not Allowed',
+            details: `Endpoint /api/upload only accepts POST requests, but received ${request.method}`,
+            allowedMethods: ['POST']
+          }),
+          { 
+            status: 405, 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json',
+              'Allow': 'POST'
+            } 
+          }
+        );
+      }
+      console.log('✅ Method OK, proceeding with upload handler');
       return handleUpload(request, r2Bucket, kvStore, corsHeaders);
-    } else if (path === '/api/gallery' && request.method === 'GET') {
+    } else if (path === '/api/gallery') {
+      if (request.method !== 'GET') {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Method Not Allowed',
+            details: `Endpoint /api/gallery only accepts GET requests, but received ${request.method}`,
+            allowedMethods: ['GET']
+          }),
+          { 
+            status: 405, 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json',
+              'Allow': 'GET'
+            } 
+          }
+        );
+      }
       return handleGetGallery(kvStore, r2Bucket, corsHeaders);
-    } else if (path === '/api/groups' && request.method === 'GET') {
+    } else if (path === '/api/groups') {
+      if (request.method !== 'GET') {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Method Not Allowed',
+            details: `Endpoint /api/groups only accepts GET requests, but received ${request.method}`,
+            allowedMethods: ['GET']
+          }),
+          { 
+            status: 405, 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json',
+              'Allow': 'GET'
+            } 
+          }
+        );
+      }
       return handleGetGroups(kvStore, corsHeaders);
-    } else if (path.startsWith('/api/delete/') && request.method === 'DELETE') {
+    } else if (path.startsWith('/api/delete/')) {
+      if (request.method !== 'DELETE') {
+        const imageId = path.replace('/api/delete/', '');
+        return new Response(
+          JSON.stringify({ 
+            error: 'Method Not Allowed',
+            details: `Endpoint /api/delete/${imageId} only accepts DELETE requests, but received ${request.method}`,
+            allowedMethods: ['DELETE']
+          }),
+          { 
+            status: 405, 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json',
+              'Allow': 'DELETE'
+            } 
+          }
+        );
+      }
       const imageId = path.replace('/api/delete/', '');
       return handleDeleteImage(imageId, r2Bucket, kvStore, corsHeaders);
-    } else if (path.startsWith('/api/delete-group/') && request.method === 'DELETE') {
+    } else if (path.startsWith('/api/delete-group/')) {
+      if (request.method !== 'DELETE') {
+        const groupName = decodeURIComponent(path.replace('/api/delete-group/', ''));
+        return new Response(
+          JSON.stringify({ 
+            error: 'Method Not Allowed',
+            details: `Endpoint /api/delete-group/${groupName} only accepts DELETE requests, but received ${request.method}`,
+            allowedMethods: ['DELETE']
+          }),
+          { 
+            status: 405, 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json',
+              'Allow': 'DELETE'
+            } 
+          }
+        );
+      }
       const groupName = decodeURIComponent(path.replace('/api/delete-group/', ''));
       return handleDeleteGroup(groupName, r2Bucket, kvStore, corsHeaders);
     } else if (path.startsWith('/api/image/')) {
+      if (request.method !== 'GET') {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Method Not Allowed',
+            details: `Endpoint /api/image/* only accepts GET requests, but received ${request.method}`,
+            allowedMethods: ['GET']
+          }),
+          { 
+            status: 405, 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json',
+              'Allow': 'GET'
+            } 
+          }
+        );
+      }
       // Extract the filename/path after /api/image/
       // This can be a simple filename or a path like gallery-images/gallery-image/image-123.jpg
       let filename = path.substring('/api/image/'.length);
@@ -147,7 +259,7 @@ export async function onRequest(context) {
       return handleGetImage(filename, r2Bucket, corsHeaders);
     } else {
       return new Response(
-        JSON.stringify({ error: 'Not found' }),
+        JSON.stringify({ error: 'Not found', details: `Path ${path} does not exist` }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
